@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import os
+import json
 
 router = APIRouter()
 
@@ -9,7 +10,7 @@ class Connection(BaseModel):
     plugin: str
     access_key: str = None
     secret_key: str = None
-    regions: str = None
+    regions: list = None
     project_id: str = None
     credentials_file: str = None
     client_id: str = None
@@ -53,10 +54,11 @@ connection "{connection.name}" {{
   plugin    = "{connection.plugin}"
 """
     if connection.plugin == "aws":
+        regions_string = ', '.join(f'"{region}"' for region in connection.regions)
         config_content += f"""
   access_key = "{connection.access_key}"
   secret_key = "{connection.secret_key}"
-  regions    = ["{connection.regions}"]
+  regions    = [{regions_string}]
 }}
 """
     elif connection.plugin == "gcp":
